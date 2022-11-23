@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/Archpurohit/tinyapp/issues"
   },
-  "homepage": "https://github.com/Archpurohit/tinyapp#readme"
+  "homepage": "https://github.com/Archpurohit/tinyapp#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
 }
