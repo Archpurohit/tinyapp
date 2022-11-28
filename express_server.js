@@ -52,31 +52,37 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new", templateVars);
 });
 
+// rendering a url show page
 app.get("/urls/:id", (req, res) => {
   const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id],username: req.cookies["username"] };
   res.render("urls_show", templateVars);
 });
 
+// redirect to a new longurl
 app.get("/u/:id", (req, res) => {
-  // const longURL = ...
+  const longURL = urlDatabase[req.params.id]
+  console.log(req.body)
   res.redirect(longURL);
 });
 
+// Create a new url
 app.post("/urls", (req, res) => {
   console.log(req.body); // Log the POST request body to the console
-  res.send("Ok"); // Respond with 'Ok' (we will replace this)
+  res.render("Ok"); // Respond with 'Ok' (we will replace this)
 });
 
 // delete url
-app.post('/urls/:shortURL/delete', (req, res) => {
-  const shortURL = req.params.shortURL;
-  res.redirect(longURL);
+app.post('/urls/:id/delete', (req, res) => {
+  delete urlDatabase[req.params.id]
+  res.redirect('/urls');
 })
 
-// edit
-app.post('/urls/:shortURL', (req, res) => {
+// updating url
+app.post('/urls/:id', (req, res) => {
+const userInput = req.params.id
   res.redirect(`/urls`);
 })
+
 //  log in
 app.post('/login', (req, res) => {
   res.cookie("username", req.body.username)
