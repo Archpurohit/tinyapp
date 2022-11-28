@@ -1,10 +1,9 @@
 {
   "name": "tinyapp",
   "version": "1.0.0",
-  "description": "",
   "main": "express_server.js",
   "scripts": {
-    "start": "./node_modules/.bin/nodemon -L express_server.js",
+    "start": "nodemon -L express_server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "[Your name and email]",
@@ -12,9 +11,19 @@
   "dependencies": {
     "cookie-parser": "^1.4.6",
     "ejs": "^3.1.8",
-    "express": "^4.18.1"
+    "express": "^4.18.2"
   },
   "devDependencies": {
     "nodemon": "^2.0.16"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Archpurohit/tinyapp.git"
+  },
+  "keywords": [],
+  "bugs": {
+    "url": "https://github.com/Archpurohit/tinyapp/issues"
+  },
+  "homepage": "https://github.com/Archpurohit/tinyapp#readme",
+  "description": ""
 }
