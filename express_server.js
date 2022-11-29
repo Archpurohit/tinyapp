@@ -7,7 +7,21 @@ const PORT = 8080; // default port 8080
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser())
-function generateRandomString() {}
+function generateRandomString(len = 6) {
+  // No input
+  // 6 random characters
+  // includes a-z, A-Z 0-9
+  let alphanumeric = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567689";
+  // loop through them
+  let code = new Array();
+  for(let i=0; i< len; i++){
+    let index = Math.floor(Math.random() * alphanumeric.length);
+    code.push(alphanumeric.charAt(index));
+  }
+  code = code.join("")
+  return code
+}
+console.log(generateRandomString())
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -61,14 +75,14 @@ app.get("/urls/:id", (req, res) => {
 // redirect to a new longurl
 app.get("/u/:id", (req, res) => {
   const longURL = urlDatabase[req.params.id]
-  console.log(req.body)
   res.redirect(longURL);
 });
 
 // Create a new url
 app.post("/urls", (req, res) => {
+  const longURL = urlDatabase[req.params.id]
   console.log(req.body); // Log the POST request body to the console
-  res.render("Ok"); // Respond with 'Ok' (we will replace this)
+  res.redirect("/urls/:id")
 });
 
 // delete url
@@ -80,6 +94,8 @@ app.post('/urls/:id/delete', (req, res) => {
 // updating url
 app.post('/urls/:id', (req, res) => {
 const userInput = req.params.id
+const shortURL = generateRandomString(userInput);
+const urlDatabase = shortURL
   res.redirect(`/urls`);
 })
 
