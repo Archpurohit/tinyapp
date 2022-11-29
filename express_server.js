@@ -79,11 +79,11 @@ app.get("/u/:id", (req, res) => {
 });
 
 // Create a new url
-app.post("/urls", (req, res) => {
-  const longURL = urlDatabase[req.params.id]
-  console.log(req.body); // Log the POST request body to the console
-  res.redirect("/urls/:id")
-});
+app.post('/urls', (req, res) => {
+  const shortURL = generateRandomString();
+  urlDatabase[shortURL] = req.body.longURL;
+  res.redirect(`/urls/${shortURL}`);
+})
 
 // delete url
 app.post('/urls/:id/delete', (req, res) => {
@@ -93,9 +93,8 @@ app.post('/urls/:id/delete', (req, res) => {
 
 // updating url
 app.post('/urls/:id', (req, res) => {
-const userInput = req.params.id
-const shortURL = generateRandomString(userInput);
-const urlDatabase = shortURL
+const longURL = req.params.id
+const shortURL = generateRandomString();
   res.redirect(`/urls`);
 })
 
