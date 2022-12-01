@@ -2,6 +2,9 @@ const express = require("express");
 const app = express();
 const cookieParser = require('cookie-parser')
 const PORT = 8080; // default port 8080
+const users = require('./db');
+const userHelper = require('./userHelper')(users);
+
 
 // ejs
 app.set("view engine", "ejs");
@@ -21,11 +24,11 @@ function generateRandomString(len = 6) {
   code = code.join("")
   return code
 }
-console.log(generateRandomString())
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
+
 };
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
@@ -49,7 +52,7 @@ app.get("/set", (req, res) => {
  });
 
  app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase, username: req.cookies["username"] };
+  const templateVars = { urls: urlDatabase, username: req.cookies["username"], };
   res.render("urls_index", templateVars);
 });
 
@@ -72,12 +75,6 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
-// redirect to a new longurl
-app.get("/u/:id", (req, res) => {
-  const longURL = urlDatabase[req.params.id]
-  res.redirect(longURL);
-});
-
 // Create a new url
 app.post('/urls', (req, res) => {
   const shortURL = generateRandomString();
@@ -93,22 +90,81 @@ app.post('/urls/:id/delete', (req, res) => {
 
 // updating url
 app.post('/urls/:id', (req, res) => {
-const longURL = req.params.id
-const shortURL = generateRandomString();
+  // console.log(req.body)
+  urlDatabase[req.params.id] = req.body.longURL
+
+  // take the data and put it in the database
+  // urlDatabase[shortURL] = req.params.id; change longurl code here
   res.redirect(`/urls`);
 })
 
-//  log in
+// login Get
+app.get("/login", (req, res) => {
+  let templateVars = {
+    user: users[req.session.username]
+  };
+  if (templateVars.user) {
+    res.redirect("/urls");
+  } else {
+    res.render("urls_login", templateVars);
+  }
+});
+
+//  log in POST
 app.post('/login', (req, res) => {
-  res.cookie("username", req.body.username)
-  res.redirect(`/urls`);
+  const email = req.body.email;
+  const password = req.body.password;
+  const user = userHelper.loginUser(email, password);
+  if (user) {
+    res.cookie("username", req.body.username)
+  }
+  res.redirect('/urls');
 })
+
 
 // logout
 app.post('/logout', (req, res) => {
   res.clearCookie('username', req.body.username);
   res.redirect(`/urls`);
 })
+
+
+// Registration Page GET
+app.get('/register', (req, res) => {
+  if (req.session.username) {
+    res.redirect('/urls');
+    return;
+  }
+  const templateVars = {user: users[req.session.userID]};
+  res.render('urls_registration', templateVars);
+});
+
+
+// registration page POST
+app.post('/register', (req, res) => {
+  if (req.body.email && req.body.password) {
+
+    if (!getUserByEmail(req.body.email, users)) {
+      const userID = generateRandomString();
+      users[userID] = {
+        userID,
+        email: req.body.email,
+        password: bcrypt.hashSync(req.body.password, 10)
+      };
+      req.session.userID = userID;
+      res.redirect('/urls');
+    } else {
+      const errorMessage = 'Cannot create new account, because this email address is already registered.';
+      res.status(400).render('urls_error', {user: users[req.session.userID], errorMessage});
+    }
+
+  } else {
+    const errorMessage = 'Empty username or password. Please make sure you fill out both fields.';
+    res.status(400).render('urls_error', {user: users[req.session.userID], errorMessage});
+  }
+});
+
+
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
