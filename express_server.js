@@ -179,14 +179,9 @@ app.post('/logout', (req, res) => {
 
 // Registration Page GET
 app.get('/register', (req, res) => {
-  if (req.session.username) {
-    res.redirect('/urls');
-    return;
-  }
-  const templateVars = {user: users[req.session.userID]};
-  res.render('urls_registration', templateVars);
+  const templatevars = {username: req.cookies["username"]}
+  res.render('urls_register', templatevars);
 });
-
 
 // registration page POST
 app.post('/register', (req, res) => {
