@@ -98,28 +98,76 @@ app.post('/urls/:id', (req, res) => {
   res.redirect(`/urls`);
 })
 
-// login Get
-app.get("/login", (req, res) => {
-  let templateVars = {
-    user: users[req.session.username]
-  };
-  if (templateVars.user) {
-    res.redirect("/urls");
-  } else {
-    res.render("urls_login", templateVars);
+// GET /protected
+app.get('/protected', (req, res) => {
+  // retrieve the user's cookie
+  const userId = req.session.userId;
+
+  // check if the user is logged in
+  if (!userId) {
+    return res.status(401).send('you are not allowed to be here');
   }
+
+  // retrieve the user's information from the `users` object
+  const user = users[userId];
+
+  const templateVars = {
+    email: user.email
+  };
+
+  res.render('protected', templateVars);
+});
+
+// login Get
+app.get('/login', (req, res) => {
+  const templatevars = {username: req.cookies["username"]}
+  res.render('urls_login', templatevars);
 });
 
 //  log in POST
 app.post('/login', (req, res) => {
+  console.log('req.body', req.body);
   const email = req.body.email;
   const password = req.body.password;
-  const user = userHelper.loginUser(email, password);
-  if (user) {
-    res.cookie("username", req.body.username)
+
+  // did they give us an email and a password
+  if (!email || !password) {
+    return res.status(400).send('please provide an email and a password');
   }
-  res.redirect('/urls');
-})
+
+  // find the user by their email address
+  let foundUser = null;
+
+  for (const userId in users) {
+    const user = users[userId];
+    if (user.email === email) {
+      foundUser = user;
+    }
+  }
+
+  // did we NOT find someone?
+  if (!foundUser) {
+    return res.status(400).send('no user with that email found');
+  }
+
+  // console.log('foundUser', foundUser);
+
+  // bcrypt                            entered pass, hash
+  const passwordMatch = bcrypt.compareSync(password, foundUser.password); // true || false
+
+  // do the passwords NOT match
+  if (passwordMatch === false) {
+    return res.status(400).send('the passwords do not match');
+  }
+
+  // happy path! the user is who they say they are!
+  // set the cookie
+  // res.cookie('userId', foundUser.id);
+  req.session.userId = foundUser.id;
+
+  // redirect the user
+  res.redirect('/protected');
+});
 
 
 // logout
@@ -144,7 +192,7 @@ app.get('/register', (req, res) => {
 app.post('/register', (req, res) => {
   if (req.body.email && req.body.password) {
 
-    if (!getUserByEmail(req.body.email, users)) {
+    if (!getUserByEmail(req.body.email, username)) {
       const userID = generateRandomString();
       users[userID] = {
         userID,
@@ -163,6 +211,7 @@ app.post('/register', (req, res) => {
     res.status(400).render('urls_error', {user: users[req.session.userID], errorMessage});
   }
 });
+
 
 
 
