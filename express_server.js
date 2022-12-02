@@ -2,14 +2,17 @@ const express = require("express");
 const app = express();
 const cookieParser = require('cookie-parser')
 const PORT = 8080; // default port 8080
-const users = require('./db');
-const userHelper = require('./userHelper')(users);
+var bcrypt = require('bcryptjs');
+const {users} = require('./utils/db');
+const e = require("express");
+const userHelper = require('./utils/userHelper')(users);
 
-
+// const {generateId, registerUser, loginUser} = require('./userHelper.js')
 // ejs
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser())
+
 function generateRandomString(len = 6) {
   // No input
   // 6 random characters
@@ -24,7 +27,7 @@ function generateRandomString(len = 6) {
   code = code.join("")
   return code
 }
-
+// generateran getuseremail, urlsforuser
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
@@ -101,7 +104,7 @@ app.post('/urls/:id', (req, res) => {
 // GET /protected
 app.get('/protected', (req, res) => {
   // retrieve the user's cookie
-  const userId = req.session.userId;
+  const userId = req.session.username;
 
   // check if the user is logged in
   if (!userId) {
@@ -109,7 +112,7 @@ app.get('/protected', (req, res) => {
   }
 
   // retrieve the user's information from the `users` object
-  const user = users[userId];
+  const user = users[userRandomID];
 
   const templateVars = {
     email: user.email
@@ -126,49 +129,14 @@ app.get('/login', (req, res) => {
 
 //  log in POST
 app.post('/login', (req, res) => {
-  console.log('req.body', req.body);
   const email = req.body.email;
   const password = req.body.password;
-
-  // did they give us an email and a password
-  if (!email || !password) {
-    return res.status(400).send('please provide an email and a password');
+  const user = userHelper.loginUser(email, password);
+  if (user) {
+    res.cookie('user_id', user.id)
   }
-
-  // find the user by their email address
-  let foundUser = null;
-
-  for (const userId in users) {
-    const user = users[userId];
-    if (user.email === email) {
-      foundUser = user;
-    }
-  }
-
-  // did we NOT find someone?
-  if (!foundUser) {
-    return res.status(400).send('no user with that email found');
-  }
-
-  // console.log('foundUser', foundUser);
-
-  // bcrypt                            entered pass, hash
-  const passwordMatch = bcrypt.compareSync(password, foundUser.password); // true || false
-
-  // do the passwords NOT match
-  if (passwordMatch === false) {
-    return res.status(400).send('the passwords do not match');
-  }
-
-  // happy path! the user is who they say they are!
-  // set the cookie
-  // res.cookie('userId', foundUser.id);
-  req.session.userId = foundUser.id;
-
-  // redirect the user
-  res.redirect('/protected');
-});
-
+  res.redirect('/urls');
+})
 
 // logout
 app.post('/logout', (req, res) => {
@@ -185,26 +153,32 @@ app.get('/register', (req, res) => {
 
 // registration page POST
 app.post('/register', (req, res) => {
-  if (req.body.email && req.body.password) {
-
-    if (!getUserByEmail(req.body.email, username)) {
-      const userID = generateRandomString();
-      users[userID] = {
-        userID,
-        email: req.body.email,
-        password: bcrypt.hashSync(req.body.password, 10)
-      };
-      req.session.userID = userID;
-      res.redirect('/urls');
-    } else {
-      const errorMessage = 'Cannot create new account, because this email address is already registered.';
-      res.status(400).render('urls_error', {user: users[req.session.userID], errorMessage});
-    }
-
-  } else {
-    const errorMessage = 'Empty username or password. Please make sure you fill out both fields.';
-    res.status(400).render('urls_error', {user: users[req.session.userID], errorMessage});
+  const email = req.body.email;
+  const password = req.body.password;
+  const name = req.body.name;
+  if (!email || !password) {
+    return res.status(400).send('please provide an email and a password');
   }
+  if(userHelper.getUserByEmail(email, users) )
+  { return res.status(400).send("Email is already registered")
+  }
+  const id = generateRandomString();
+  // const user = userHelper.registerUser(name, email, password);
+users[id] = {
+  id,email, password
+}
+  res.cookie('user_id',id).redirect('/urls')
+})
+
+
+// POST /logout
+app.post('/logout', (req, res) => {
+  // clear the user's cookie
+  // res.clearCookie('userId');
+  req.session = null; // Delete current session
+
+  // send the user somewhere
+  res.redirect('/login');
 });
 
 

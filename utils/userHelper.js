@@ -32,6 +32,14 @@ function UserHelper(db) {
       users[id] = { id, name, email, password }
 
       return users[id]
+    },
+
+    getUserByEmail: function (email, userdb){
+      for(let userid in userdb){
+        if(userdb[userid].email === email){
+          return userdb[userid]
+        }
+      }
     }
   }
 }
