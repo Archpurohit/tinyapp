@@ -121,22 +121,73 @@ app.get('/protected', (req, res) => {
   res.render('protected', templateVars);
 });
 
-// login Get
+
+
 app.get('/login', (req, res) => {
   const templatevars = {username: req.cookies["username"]}
   res.render('urls_login', templatevars);
 });
 
 //  log in POST
+// app.post('/login', (req, res) => {
+//   const email = req.body.email;
+//   const password = req.body.password;
+//   const user = userHelper.loginUser(email, password);
+//   if (!email || !password) {
+//     return res.status(403).send('please provide an email and a password');
+//   }
+
+//   // find the user by their email address
+//   let foundUser = null;
+
+//   for (const userId in users) {
+//     const user = users[userId];
+//     if (user.email === email) {
+//       foundUser = user;
+//     }
+//   }
+
+//   if (!foundUser) {
+//     return res.status(400).send('no user with that email found');
+//   }
+//   const passwordMatch = bcrypt.compareSync(password, foundUser.password); // true || false
+//   if (passwordMatch === false) {
+//     return res.status(400).send('the passwords do not match');
+//   }
+//  res.cookie('userId', foundUser.id);
+//   req.session.userId = foundUser.id;
+//   res.redirect('/urls');
+
+// });
 app.post('/login', (req, res) => {
+  // set cookie in response
   const email = req.body.email;
   const password = req.body.password;
   const user = userHelper.loginUser(email, password);
-  if (user) {
-    res.cookie('user_id', user.id)
-  }
-  res.redirect('/urls');
-})
+  if (!email || !password) {
+        return res.status(403).send('please provide an email and a password');
+      }
+
+      // find the user by their email address
+      let foundUser = null;
+
+      for (const userId in users) {
+        const user = users[userId];
+        if (user.email === email) {
+          foundUser = user;
+        }
+      }
+
+      if (!foundUser) {
+        return res.status(400).send('no user with that email found')
+      } else {(user) => {
+        res.cookie('user_id', user.id)
+    }
+         res.redirect('/urls'); }
+
+    })
+
+
 
 // logout
 app.post('/logout', (req, res) => {
@@ -174,7 +225,7 @@ users[id] = {
 // POST /logout
 app.post('/logout', (req, res) => {
   // clear the user's cookie
-  // res.clearCookie('userId');
+  res.clearCookie('userId');
   req.session = null; // Delete current session
 
   // send the user somewhere
