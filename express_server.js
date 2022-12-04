@@ -6,8 +6,14 @@ var bcrypt = require('bcryptjs');
 const {users} = require('./utils/db');
 const e = require("express");
 const userHelper = require('./utils/userHelper')(users);
+const cookieSession = require('cookie-session')
 
-// const {generateId, registerUser, loginUser} = require('./userHelper.js')
+app.use(cookieSession({
+  name: 'session',
+ keys: ['j2k3h423h4k23h', 'j23h4kj23h4k23h4', '1h2jgahsdi12e8'],
+}))
+
+
 // ejs
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
@@ -212,6 +218,10 @@ app.post('/register', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   const name = req.body.name;
+  const salt = bcrypt.genSaltSync();
+  const hashed = bcrypt.hashSync(password, salt)
+  const currentUser = userHelper.getUserByEmail(email, users)
+
   if (!email || !password) {
     return res.status(400).send('please provide an email and a password');
   }
@@ -221,9 +231,11 @@ app.post('/register', (req, res) => {
   const id = generateRandomString();
   // const user = userHelper.registerUser(name, email, password);
 users[id] = {
-  id,email, password
+  id,email, hashed
 }
-  res.cookie('user_id',id).redirect('/urls')
+req.session.userId = users.id
+  req.session.pageViews = 0;
+  res.cookie('user_id',id).redirect('/login')
 })
 
 
