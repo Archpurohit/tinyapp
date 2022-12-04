@@ -11,6 +11,16 @@ function UserHelper(db) {
       return id;
     },
 
+    urlsForUser: function (id, db){
+      const userURLs = {};
+      for (let url in db) {
+        if (id === db[url].userID) {
+          userURLs[url] = db[url];
+        }
+      }
+      return userURLs;
+    },
+
     // get user by verifying email and password
     loginUser: function (email, password) {
       if (!email || !password) {
@@ -42,5 +52,6 @@ function UserHelper(db) {
       }
     }
   }
+
 }
 module.exports = UserHelper;

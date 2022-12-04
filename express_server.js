@@ -81,6 +81,7 @@ app.get("/urls/:id", (req, res) => {
 // Create a new url
 app.post('/urls', (req, res) => {
   const shortURL = generateRandomString();
+
   urlDatabase[shortURL] = req.body.longURL;
   res.redirect(`/urls/${shortURL}`);
 })
@@ -124,7 +125,11 @@ app.get('/protected', (req, res) => {
 
 
 app.get('/login', (req, res) => {
-  const templatevars = {username: req.cookies["username"]}
+  const userId = req.cookies.userId;
+  const templatevars = {
+    username: req.cookies["username"]
+
+  }
   res.render('urls_login', templatevars);
 });
 
@@ -163,7 +168,9 @@ app.post('/login', (req, res) => {
   // set cookie in response
   const email = req.body.email;
   const password = req.body.password;
+  const userId = req.body.userId;
   const user = userHelper.loginUser(email, password);
+
   if (!email || !password) {
         return res.status(403).send('please provide an email and a password');
       }
@@ -177,22 +184,20 @@ app.post('/login', (req, res) => {
           foundUser = user;
         }
       }
-
       if (!foundUser) {
         return res.status(400).send('no user with that email found')
-      } else {(user) => {
+      }
         res.cookie('user_id', user.id)
-    }
          res.redirect('/urls'); }
 
-    })
+  )
 
 
 
 // logout
 app.post('/logout', (req, res) => {
   res.clearCookie('username', req.body.username);
-  res.redirect(`/urls`);
+  res.redirect(`/login`);
 })
 
 
