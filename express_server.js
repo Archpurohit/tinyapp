@@ -70,18 +70,30 @@ app.get("/hello", (req, res) => {
   res.render("hello_world", templateVars);
 });
 
-app.get("/urls/new", (req, res) => {
-  const templateVars = {
-    username: req.cookies["username"]
+// app.get("/urls/new", (req, res) => {
+//   const templateVars = {
+//     username: req.cookies["username"]
 
-  };
-  res.render("urls_new", templateVars);
+//   };
+//   res.render("urls_new", templateVars);
+// });
+app.get('/urls/new', (req, res) => {
+  if (!req.cookies["username"]) {
+    res.redirect('/login');
+  } else {
+    const templateVars = {username: req.cookies["username"]};
+    res.render('urls_new', templateVars);
+  }
 });
 
 // rendering a url show page
 app.get("/urls/:id", (req, res) => {
   const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id],username: req.cookies["username"] };
+  if(!users){
+  res.redirect("urls_login")
+  } else {
   res.render("urls_show", templateVars);
+  }
 });
 
 // Create a new url
@@ -139,37 +151,6 @@ app.get('/login', (req, res) => {
   res.render('urls_login', templatevars);
 });
 
-//  log in POST
-// app.post('/login', (req, res) => {
-//   const email = req.body.email;
-//   const password = req.body.password;
-//   const user = userHelper.loginUser(email, password);
-//   if (!email || !password) {
-//     return res.status(403).send('please provide an email and a password');
-//   }
-
-//   // find the user by their email address
-//   let foundUser = null;
-
-//   for (const userId in users) {
-//     const user = users[userId];
-//     if (user.email === email) {
-//       foundUser = user;
-//     }
-//   }
-
-//   if (!foundUser) {
-//     return res.status(400).send('no user with that email found');
-//   }
-//   const passwordMatch = bcrypt.compareSync(password, foundUser.password); // true || false
-//   if (passwordMatch === false) {
-//     return res.status(400).send('the passwords do not match');
-//   }
-//  res.cookie('userId', foundUser.id);
-//   req.session.userId = foundUser.id;
-//   res.redirect('/urls');
-
-// });
 app.post('/login', (req, res) => {
   // set cookie in response
   const email = req.body.email;
@@ -193,7 +174,7 @@ app.post('/login', (req, res) => {
       if (!foundUser) {
         return res.status(400).send('no user with that email found')
       }
-        res.cookie('user_id', user.id)
+        res.cookie('users[id]', users.id)
          res.redirect('/urls'); }
 
   )
