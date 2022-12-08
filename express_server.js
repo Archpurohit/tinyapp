@@ -19,20 +19,7 @@ app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser())
 
-function generateRandomString(len = 6) {
-  // No input
-  // 6 random characters
-  // includes a-z, A-Z 0-9
-  let alphanumeric = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567689";
-  // loop through them
-  let code = new Array();
-  for(let i=0; i< len; i++){
-    let index = Math.floor(Math.random() * alphanumeric.length);
-    code.push(alphanumeric.charAt(index));
-  }
-  code = code.join("")
-  return code
-}
+
 // generateran getuseremail, urlsforuser
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -98,7 +85,7 @@ app.get("/urls/:id", (req, res) => {
 
 // Create a new url
 app.post('/urls', (req, res) => {
-  const shortURL = generateRandomString();
+  const shortURL = userHelper.generateRandomString();
 
   urlDatabase[shortURL] = req.body.longURL;
   res.redirect(`/urls/${shortURL}`);
@@ -209,7 +196,7 @@ app.post('/register', (req, res) => {
   if(userHelper.getUserByEmail(email, users) )
   { return res.status(400).send("Email is already registered")
   }
-  const id = generateRandomString();
+  const id = userHelper.generateRandomString();
   // const user = userHelper.registerUser(name, email, password);
 users[id] = {
   id,email, hashed

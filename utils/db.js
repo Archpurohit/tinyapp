@@ -9,3 +9,9 @@ module.exports = {
     email: "user2@example.com",
     password: "dishwasher-funk",
   }}}
+
+  const urlDatabase = {
+    "b2xVn2": "http://www.lighthouselabs.ca",
+    "9sm5xK": "http://www.google.com"
+
+  };
