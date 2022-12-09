@@ -32,8 +32,8 @@ function UserHelper(db) {
     },
 
     // find user by existing user_id
-    findUser: function (user_id) {
-      return users[user_id]
+    findUser: function (user_id, userdb) {
+      return userdb[user_id]
     },
 
     // to register a new user
@@ -50,21 +50,8 @@ function UserHelper(db) {
           return userdb[userid]
         }
       }
+      return undefined
     }
-  }
-  function generateRandomString(len = 6) {
-    // No input
-    // 6 random characters
-    // includes a-z, A-Z 0-9
-    let alphanumeric = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567689";
-    // loop through them
-    let code = new Array();
-    for(let i=0; i< len; i++){
-      let index = Math.floor(Math.random() * alphanumeric.length);
-      code.push(alphanumeric.charAt(index));
-    }
-    code = code.join("")
-    return code
   }
 }
 
