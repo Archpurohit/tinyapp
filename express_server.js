@@ -16,15 +16,13 @@ app.use(
 );
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
-
+  b2xVn2: "http://www.lighthouselabs.ca",
+  "9sm5xK": "http://www.google.com",
 };
 
 // ejs
 app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
-
 
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
@@ -57,21 +55,21 @@ app.get("/urls", (req, res) => {
 
   // const urlsForUserDB = userHelper.urlsForUser(userID, urlDatabase);
   if (!userID) {
-    console.log("test")
+    console.log("test");
     res.redirect("/login");
   }
-    const templateVars = {
-      urls: urlDatabase, user: users[userID]
-    }
-    console.log(templateVars)
-    res.render("urls_index", templateVars);
+  const templateVars = {
+    urls: urlDatabase,
+    user: users[userID],
+  };
+  console.log(templateVars);
+  res.render("urls_index", templateVars);
 });
 
 app.get("/hello", (req, res) => {
   const templateVars = { greeting: "Hello World!" };
   res.render("hello_world", templateVars);
 });
-
 
 app.get("/urls/new", (req, res) => {
   if (!req.session.user_id) {
@@ -96,20 +94,17 @@ app.get("/urls/:id", (req, res) => {
   }
 });
 
-
 app.post("/urls", (req, res) => {
   const shortURL = userHelper.generateId();
   const userID = req.session.user_id;
-  const longURL = req.body.longURL
+  const longURL = req.body.longURL;
   if (userID) {
     urlDatabase[shortURL] = longURL;
-console.log(urlDatabase)
+    console.log(urlDatabase);
 
     res.redirect(`/urls/${shortURL}`);
   } else {
-    return res
-      .status(400)
-      .send(" log in to save urls");
+    return res.status(400).send(" log in to save urls");
   }
 });
 
@@ -166,15 +161,13 @@ app.post("/login", (req, res) => {
   if (user === null) {
     return res.status(400).send("No user found with that email");
   }
-  const passwordMatch = bcrypt.compareSync(password,user.password)
+  const passwordMatch = bcrypt.compareSync(password, user.password);
   if (passwordMatch === false) {
-    return res
-      .status(400)
-      .send("Username or password incorrect");
+    return res.status(400).send("Username or password incorrect");
   }
-    req.session.user_id = user.id;
-    res.redirect("/urls");
-  });
+  req.session.user_id = user.id;
+  res.redirect("/urls");
+});
 
 // logout
 // app.post("/logout", (req, res) => {
@@ -184,7 +177,7 @@ app.post("/login", (req, res) => {
 
 // Registration Page GET
 app.get("/register", (req, res) => {
-  const templatevars = { user: req.session.user_id};
+  const templatevars = { user: req.session.user_id };
   res.render("urls_register", templatevars);
 });
 
@@ -208,21 +201,19 @@ app.post("/register", (req, res) => {
     email: userEmail,
     password: hashed,
   };
-  console.log({users})
+  console.log({ users });
   req.session.userId = users.id;
   req.session.pageViews = 0;
   // res.cookie("user_id", id).redirect("/login");
 
-  res.redirect("/urls")
+  res.redirect("/urls");
 });
-
 
 // POST /logout
 app.post("/logout", (req, res) => {
-
-console.log("login out")
-  req.session = null
-console.log(req.session)
+  console.log("login out");
+  req.session = null;
+  console.log(req.session);
   // res.clearCookie("session")
   // res.clearCookie("session.sig")
 
