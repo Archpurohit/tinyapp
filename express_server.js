@@ -51,18 +51,13 @@ app.get("/fetch", (req, res) => {
 
 app.get("/urls", (req, res) => {
   const userID = req.session.user_id;
-  // const user = userHelper.getUserByEmail(userID, users);
-
-  // const urlsForUserDB = userHelper.urlsForUser(userID, urlDatabase);
   if (!userID) {
-    console.log("test");
     res.redirect("/login");
   }
   const templateVars = {
     urls: urlDatabase,
     user: users[userID],
   };
-  console.log(templateVars);
   res.render("urls_index", templateVars);
 });
 
@@ -117,9 +112,6 @@ app.post("/urls/:id/delete", (req, res) => {
 // updating url
 app.post("/urls/:id", (req, res) => {
   urlDatabase[req.params.id] = req.body.longURL;
-
-  // take the data and put it in the database
-  // urlDatabase[shortURL] = req.params.id; change longurl code here
   res.redirect(`/urls`);
 });
 
@@ -135,14 +127,11 @@ app.get("/protected", (req, res) => {
 
   // retrieve the user's information from the `users` object
   const user = users[userRandomID];
-
   const templateVars = {
     email: user.email,
   };
-
   res.render("protected", templateVars);
 });
-
 app.get("/login", (req, res) => {
   // const userId = req.cookies.user_id;
   const templatevars = {
@@ -155,7 +144,7 @@ app.post("/login", (req, res) => {
   const userEmail = req.body.email;
   const password = req.body.password;
   const user = userHelper.getUserByEmail(userEmail, users);
-  if (!userEmail || !password) {
+  if (!user || !password) {
     return res.status(400).send("must fill out valid email and password");
   }
   if (user === null) {
@@ -168,12 +157,6 @@ app.post("/login", (req, res) => {
   req.session.user_id = user.id;
   res.redirect("/urls");
 });
-
-// logout
-// app.post("/logout", (req, res) => {
-//   res.clearCookie("user", req.body.user);
-//   res.redirect(`/login`);
-// });
 
 // Registration Page GET
 app.get("/register", (req, res) => {
@@ -201,7 +184,6 @@ app.post("/register", (req, res) => {
     email: userEmail,
     password: hashed,
   };
-  console.log({ users });
   req.session.userId = users.id;
   req.session.pageViews = 0;
   // res.cookie("user_id", id).redirect("/login");
@@ -211,11 +193,7 @@ app.post("/register", (req, res) => {
 
 // POST /logout
 app.post("/logout", (req, res) => {
-  console.log("login out");
   req.session = null;
-  console.log(req.session);
-  // res.clearCookie("session")
-  // res.clearCookie("session.sig")
 
   // send the user somewhere
   res.redirect("/login");
