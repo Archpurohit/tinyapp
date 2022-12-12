@@ -1,6 +1,5 @@
 const { assert } = require('chai');
-
-const { getUserByEmail } = require('../helpers.js');
+const { getUserByEmail } = require('/home/labber/lighthouse/tinyapp/utils/userHelper.js');
 
 const testUsers = {
   "userRandomID": {
