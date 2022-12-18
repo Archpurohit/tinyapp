@@ -72,16 +72,17 @@ app.get("/urls/new", (req, res) => {
 
 // rendering a url show page
 app.get("/urls/:id", (req, res) => {
- let users = req.session.user_id
   const templateVars = {
     id: req.params.id,
+    user: users[req.session.user_id],
     longURL: urlDatabase[req.params.id],
-    user: req.session.user_id,
   };
+
   if (!users) {
     res.redirect("urls_login");
   } else {
     res.render("urls_show", templateVars);
+    console.log(req.session.user_id)
   }
 });
 
@@ -103,17 +104,19 @@ app.post("/urls", (req, res) => {
 
 // delete url
 app.post("/urls/:id/delete", (req, res) => {
-if(req.session.user_id){
+  const shortURL = req.params.shortURL;
+if(req.session.user_id === urlDatabase[req.params.id]){
   delete urlDatabase[req.params.id];
   res.redirect("/urls");
 }else {
-  const errorMessage = 'You can only delete your own created URLs.';
+  alert('You can only delete your own created URLs.');
 }
 });
 
 // updating url
 app.post("/urls/:id", (req, res) => {
-  if(req.session.user_id){
+  const shortURL = req.params.shortURL;
+  if(req.session.user_id === urlDatabase[req.params.id]){
   urlDatabase[req.params.id] = req.body.longURL;
   res.redirect(`/urls`);
   } else {
