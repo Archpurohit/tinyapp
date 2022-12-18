@@ -34,24 +34,6 @@ app.set("view engine", "ejs");
 app.use(express.urlencoded({ extended: true }));
 
 
-// app.get("/urls.json", (req, res) => {
-//   res.json(urlDatabase);
-// });
-
-// app.get("/hello", (req, res) => {
-//   res.send("<html><body>Hello <b>World</b></body></html>\n");
-// });
-
-
-// app.get("/set", (req, res) => {
-//   const a = 1;
-//   res.send(`a = ${a}`);
-// });
-
-// app.get("/fetch", (req, res) => {
-//   res.send(`a = ${a}`);
-// });
-
 app.get("/", (req, res) => {
   if (req.session.user_id) {
     res.redirect("/urls");
@@ -63,7 +45,6 @@ app.get("/", (req, res) => {
 
 app.get("/urls", (req, res) => {
   const userID = req.session.user_id;
-  console.log("/urls",req.session)
   if (!userID) {
    return res.redirect("/login");
   }
@@ -77,7 +58,7 @@ app.get("/urls", (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   const userID = req.session.user_id;
-  console.log("New",userID)
+
   if (userID) {
     const templateVars = {
       user: users[req.session.user_id]
@@ -122,19 +103,26 @@ app.post("/urls", (req, res) => {
 
 // delete url
 app.post("/urls/:id/delete", (req, res) => {
+if(req.session.user_id){
   delete urlDatabase[req.params.id];
   res.redirect("/urls");
+}else {
+  const errorMessage = 'You can only delete your own created URLs.';
+}
 });
 
 // updating url
 app.post("/urls/:id", (req, res) => {
+  if(req.session.user_id){
   urlDatabase[req.params.id] = req.body.longURL;
   res.redirect(`/urls`);
+  } else {
+    const errorMessage = 'You can only delete your own created URLs.';
+  }
 });
 
 
 app.get("/login", (req, res) => {
-  // const userId = req.cookies.user_id;
   const templatevars = {
     user: req.session.user_id,
   };
@@ -196,12 +184,6 @@ app.post("/register", (req, res) => {
   };
 
   req.session.user_id = id;
-
-
-
-  // Object.key == Obj["key"]
-  // key = "usersID"
-  // Object[key] == Object.usersID
 
   res.redirect("/urls")
 });
