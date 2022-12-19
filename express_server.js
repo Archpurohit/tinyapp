@@ -63,7 +63,6 @@ app.get("/urls/new", (req, res) => {
     const templateVars = {
       user: users[req.session.user_id]
     }
-
     res.render("urls_new", templateVars);
   } else {
     res.redirect("/login");
@@ -82,7 +81,6 @@ app.get("/urls/:id", (req, res) => {
     res.redirect("urls_login");
   } else {
     res.render("urls_show", templateVars);
-    console.log(req.session.user_id)
   }
 });
 
