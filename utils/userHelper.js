@@ -15,7 +15,7 @@ function UserHelper(db) {
       const userURLs = {};
       for (let url in db) {
         if (id === db[url].userID) {
-          userURLs[url] = db[url];
+          userURLs[url] = db[url].longURL;
         }
       }
       return userURLs;

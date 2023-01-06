@@ -24,9 +24,14 @@ app.use(cookieSession({
 }))
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
-
+  b6UTxQ: {
+    longURL: "https://www.tsn.ca",
+    userID: "aJ48lW",
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "aJ48lW",
+  },
 };
 
 // ejs
@@ -49,7 +54,8 @@ app.get("/urls", (req, res) => {
    return res.redirect("/login");
   }
   const templateVars = {
-    urls: urlDatabase, user: users[userID]
+    urls: userHelper.urlsForUser(req.session.user_id, urlDatabase),
+    user: users[userID]
   }
   return res.render("urls_index", templateVars);
 });
@@ -74,7 +80,7 @@ app.get("/urls/:id", (req, res) => {
   const templateVars = {
     id: req.params.id,
     user: users[req.session.user_id],
-    longURL: urlDatabase[req.params.id],
+    longURL: urlDatabase[req.params.id].longURL,
   };
 
   if (!users) {
@@ -90,7 +96,9 @@ app.post("/urls", (req, res) => {
   const userID = req.session.user_id;
   const longURL = req.body.longURL
   if (userID) {
-    urlDatabase[shortURL] = longURL;
+    let urlobject = {longURL: longURL, userID: userID }
+    urlDatabase[shortURL] = urlobject;
+    console.log(urlDatabase)
     res.redirect(`/urls/${shortURL}`);
   } else {
     return res
@@ -102,23 +110,50 @@ app.post("/urls", (req, res) => {
 
 // delete url
 app.post("/urls/:id/delete", (req, res) => {
-  const shortURL = req.params.shortURL;
-if(req.session.user_id === urlDatabase[req.params.id]){
+  const urlId= urlDatabase[req.params.id].userID
+  const userId = req.session.user_id;
+// get URLid from req.params.iD
+// search for that URL in the database
+// compare that user id with req.session.id
+// delete
+  // If the user is not logged in, return a 401 Unauthorized response
+  if (!userId) {
+    return res.status(401).send({ error: "Unauthorized, you must be logged in to delete a URL" });
+  }
+
+  // If the user is logged in but did not create the URL, return a 403 Forbidden response
+  if (urlId !== userId) {
+    return res.status(403).send({ error: "Forbidden, you can only delete your own URLs" });
+  } else{
+  // If the user is logged in and created the URL, delete it and return a 200 OK response
   delete urlDatabase[req.params.id];
-  res.redirect("/urls");
-}else {
-  alert('You can only delete your own created URLs.');
-}
+  res.redirect(`/urls`);
+  }
 });
 
 // updating url
 app.post("/urls/:id", (req, res) => {
-  const shortURL = req.params.shortURL;
-  if(req.session.user_id === urlDatabase[req.params.id]){
-  urlDatabase[req.params.id] = req.body.longURL;
-  res.redirect(`/urls`);
+  const urlId= urlDatabase[req.params.id].userID
+  const userId = req.session.user_id;
+
+  // Look up the URL in the database
+  const url = urlDatabase[urlId];
+
+  // If the user is not logged in, return a 401 Unauthorized response
+  if (!userId) {
+    return res.status(401).send({ error: "Unauthorized, you must be logged in to edit a URL" });
+  }
+// validation for the body. If there is no longurl property, provide status code for longurl. ex 400
+
+  // If the user is logged in but did not create the URL, return a 403 Forbidden response
+  if (userId !== userId) {
+    return res.status(403).send({ error: "Forbidden, you can only edit your own URLs" });
   } else {
-    const errorMessage = 'You can only delete your own created URLs.';
+
+  // If the user is logged in and created the URL, update the URL and return a 200 OK response
+  urlDatabase[req.params.id].longURL = req.body.longURL;
+console.log( urlDatabase[req.params.id])
+  res.redirect(`/urls`);
   }
 });
 
@@ -153,9 +188,13 @@ app.post("/login", (req, res) => {
   res.redirect("/urls");
 });
 
-
+// register page checks if user is online, if so then redirects to urls. If no user, register page loads templatevars null user (no user logged in)
 app.get("/register", (req, res) => {
-  const templatevars = { user: req.session.user_id};
+  if(req.session.user_id){
+    res.redirect("/urls");
+    return
+  }
+  const templatevars = { user: null};
   res.render("urls_register", templatevars);
 });
 
