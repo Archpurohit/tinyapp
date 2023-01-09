@@ -204,7 +204,6 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
   const userEmail = req.body.email;
   const password = req.body.password;
-  const name = req.body.name;
   const salt = bcrypt.genSaltSync();
   const hashed = bcrypt.hashSync(password, salt);
   const currentUser = userHelper.getUserByEmail(userEmail, users);
