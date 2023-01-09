@@ -64,7 +64,6 @@ app.get("/urls", (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   const userID = req.session.user_id;
-
   if (userID) {
     const templateVars = {
       user: users[req.session.user_id]
@@ -97,6 +96,7 @@ app.post("/urls", (req, res) => {
   const longURL = req.body.longURL
   if (userID) {
     let urlobject = {longURL: longURL, userID: userID }
+
     urlDatabase[shortURL] = urlobject;
     console.log(urlDatabase)
     res.redirect(`/urls/${shortURL}`);
@@ -112,10 +112,6 @@ app.post("/urls", (req, res) => {
 app.post("/urls/:id/delete", (req, res) => {
   const urlId= urlDatabase[req.params.id].userID
   const userId = req.session.user_id;
-// get URLid from req.params.iD
-// search for that URL in the database
-// compare that user id with req.session.id
-// delete
   // If the user is not logged in, return a 401 Unauthorized response
   if (!userId) {
     return res.status(401).send({ error: "Unauthorized, you must be logged in to delete a URL" });
