@@ -81,7 +81,6 @@ app.get("/urls/:id", (req, res) => {
     user: users[req.session.user_id],
     longURL: urlDatabase[req.params.id].longURL,
   };
-
   if (!users) {
     res.redirect("urls_login");
   } else {
@@ -94,6 +93,12 @@ app.post("/urls", (req, res) => {
   const shortURL = userHelper.generateId();
   const userID = req.session.user_id;
   const longURL = req.body.longURL
+
+  console.log("hello")
+  if (!req.body.longURL.startsWith('http://') && !req.body.longURL.startsWith('https://')) {
+    req.body.longURL = 'http://' + req.body.longURL;
+  }
+
   if (userID) {
     let urlobject = {longURL: longURL, userID: userID }
 
@@ -105,6 +110,7 @@ app.post("/urls", (req, res) => {
       .status(400)
       .send(" log in to save urls");
   }
+
 
 });
 
