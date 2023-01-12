@@ -50,12 +50,13 @@ app.get("/", (req, res) => {
 
 app.get("/urls", (req, res) => {
   const userID = req.session.user_id;
-  if (!userID) {
-   return res.redirect("/login");
+  const user = users[userID]
+  if (!user) {
+   return res.send("<p> Please <a href='/login'> login</a> to create tinyURLS</p>");
   }
   const templateVars = {
     urls: userHelper.urlsForUser(req.session.user_id, urlDatabase),
-    user: users[userID]
+    user: user
   }
   return res.render("urls_index", templateVars);
 });
@@ -76,6 +77,15 @@ app.get("/urls/new", (req, res) => {
 
 // rendering a url show page
 app.get("/urls/:id", (req, res) => {
+  const userID = req.session.user_id;
+  const user = users[userID]
+  if (!user) {
+   return res.send("<p> Please <a href='/login'> login</a> to create tinyURLS</p>");
+  }
+  // check if user owns the URL
+  if(userID !== urlDatabase[req.params.id].userID){
+    return res.send("<p>You do not own this URL to change</p>");
+  }
   const templateVars = {
     id: req.params.id,
     user: users[req.session.user_id],
@@ -86,7 +96,15 @@ app.get("/urls/:id", (req, res) => {
   } else {
     res.render("urls_show", templateVars);
   }
+
 });
+
+app.get("/u/:id", (req,res)=> {
+const shortURL = req.params.id
+const longURL = urlDatabase[shortURL].longURL
+return res.redirect(longURL)
+})
+
 
 
 app.post("/urls", (req, res) => {
@@ -94,7 +112,7 @@ app.post("/urls", (req, res) => {
   const userID = req.session.user_id;
   const longURL = req.body.longURL
 
-  console.log("hello")
+
   if (!req.body.longURL.startsWith('http://') && !req.body.longURL.startsWith('https://')) {
     req.body.longURL = 'http://' + req.body.longURL;
   }
