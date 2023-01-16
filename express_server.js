@@ -77,6 +77,10 @@ app.get("/urls/new", (req, res) => {
 
 // rendering a url show page
 app.get("/urls/:id", (req, res) => {
+  if(!urlDatabase[req.params.id]){
+    res.send("urls does not exist")
+    return
+  }
   const userID = req.session.user_id;
   const user = users[userID]
   if (!user) {
@@ -100,6 +104,7 @@ app.get("/urls/:id", (req, res) => {
 });
 
 app.get("/u/:id", (req,res)=> {
+
 const shortURL = req.params.id
 const longURL = urlDatabase[shortURL].longURL
 return res.redirect(longURL)
@@ -111,11 +116,6 @@ app.post("/urls", (req, res) => {
   const shortURL = userHelper.generateId();
   const userID = req.session.user_id;
   const longURL = req.body.longURL
-
-
-  if (!req.body.longURL.startsWith('http://') && !req.body.longURL.startsWith('https://')) {
-    req.body.longURL = 'http://' + req.body.longURL;
-  }
 
   if (userID) {
     let urlobject = {longURL: longURL, userID: userID }
@@ -129,8 +129,10 @@ app.post("/urls", (req, res) => {
       .send(" log in to save urls");
   }
 
-
-});
+  // if (!req.body.longURL.startsWith('http://') && !req.body.longURL.startsWith('https://')) {
+    // req.body.longURL = 'http://' + req.body.longURL;
+  // }
+  });
 
 // delete url
 app.post("/urls/:id/delete", (req, res) => {
