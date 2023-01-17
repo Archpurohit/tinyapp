@@ -104,10 +104,12 @@ app.get("/urls/:id", (req, res) => {
 });
 
 app.get("/u/:id", (req,res)=> {
-
 const shortURL = req.params.id
-const longURL = urlDatabase[shortURL].longURL
-return res.redirect(longURL)
+const urlObj = urlDatabase[shortURL]
+if(!urlObj){
+  return res.status(400).send("This Url does not exist")
+}
+return res.redirect(urlObj.longURL)
 })
 
 
@@ -155,34 +157,37 @@ app.post("/urls/:id/delete", (req, res) => {
 
 // updating url
 app.post("/urls/:id", (req, res) => {
-  const urlId= urlDatabase[req.params.id].userID
   const userId = req.session.user_id;
-
-  // Look up the URL in the database
-  const url = urlDatabase[urlId];
-
   // If the user is not logged in, return a 401 Unauthorized response
   if (!userId) {
     return res.status(401).send({ error: "Unauthorized, you must be logged in to edit a URL" });
   }
-// validation for the body. If there is no longurl property, provide status code for longurl. ex 400
+
+  // Look up the URL in the database
+  const urlId= req.params.id
+  const url = urlDatabase[urlId];
+
+  if (!url) {
+    return res.status(404).send({ error: "This url doesn't exist" });
+  }
 
   // If the user is logged in but did not create the URL, return a 403 Forbidden response
-  if (userId !== userId) {
+  if (userId !== url.userID) {
     return res.status(403).send({ error: "Forbidden, you can only edit your own URLs" });
-  } else {
+  }
 
   // If the user is logged in and created the URL, update the URL and return a 200 OK response
   urlDatabase[req.params.id].longURL = req.body.longURL;
-console.log( urlDatabase[req.params.id])
   res.redirect(`/urls`);
-  }
 });
 
 
 app.get("/login", (req, res) => {
+  if(req.session.user_id){
+    return res.redirect("/urls")
+  }
   const templatevars = {
-    user: req.session.user_id,
+    user: null,
   };
   res.render("urls_login", templatevars);
 });
